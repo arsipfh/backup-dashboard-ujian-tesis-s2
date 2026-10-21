@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal Mahasiswa — Status Ujian Tesis</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="https://hukum.upnvj.ac.id/wp-content/uploads/2025/10/WhatsApp-Image-2025-10-14-at-13.45.20-1.png">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+:root{--navy:#0b2e6b;--gold:#c9a227;--green:#1a7a4a;--red:#c0392b;--gray:#f4f6f9;--border:#d0d8e8;}
+*{box-sizing:border-box;}
+body{background:#eef1f7;font-family:'Plus Jakarta Sans',system-ui,sans-serif;margin:0;font-size:.92rem;color:#1a1a2e;}
+.swal2-container{z-index:99999!important;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0b2e6b,#1a4a9e);padding:1.5rem;}
+.login-card{width:100%;max-width:390px;background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.3);padding:2rem 1.8rem;}
+.login-card img{width:62px;height:62px;object-fit:cover;border-radius:50%;border:3px solid var(--gold);}
+.login-input-group{position:relative;width:100%;}
+.login-input-group .input-icon{position:absolute;left:17px;top:50%;transform:translateY(-50%);color:#7b879d;font-size:1.05rem;z-index:10;pointer-events:none;}
+.login-input-group .login-input{width:100%;height:46px;padding:0 45px 0 48px!important;border:1px solid var(--border);border-radius:10px;font-size:.9rem;color:#344054;background:#fff;transition:all .2s;}
+.login-input-group .login-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(11,46,107,.1);outline:none;}
+.password-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);border:none;background:none;color:#7b879d;padding:0;cursor:pointer;z-index:10;}
+.password-toggle:hover{color:var(--navy);}
+.login-label{font-weight:600;color:#344054;margin-bottom:.45rem;font-size:.82rem;}
+.btn-navy{background:var(--navy);color:#fff;border:none;border-radius:10px;font-weight:700;height:46px;width:100%;}
+.btn-navy:hover{background:#0d3a82;color:#fff;}
+
+/* APP */
+.header{background:linear-gradient(135deg,#0b2e6b,#1a4a9e);color:#fff;padding:1.7rem 1rem;text-align:center;}
+.header img{width:62px;border-radius:50%;border:3px solid var(--gold);margin-bottom:.5rem;}
+.header h5{margin:0;font-weight:700;}
+.header p{font-size:.8rem;opacity:.85;margin:.25rem 0 0;}
+.card-box{background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(11,46,107,.09);padding:1.3rem;margin-bottom:1.1rem;}
+.card-box .cb-title{font-weight:700;color:var(--navy);margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem;}
+
+.status-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:6px;font-size:.76rem;font-weight:700;}
+.sb-lengkap{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;}
+.sb-sebagian{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+.sb-menunggu{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;}
+.sb-jadwal{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;}
+.sb-selesai{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;}
+.sb-kurang{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+.sb-default{background:#f8fafc;color:#475569;border:1px solid #e2e8f0;}
+
+.badge-periode{background:#fef3c7;color:#b45309;border:1px solid #fcd34d;font-size:.72rem;padding:.12rem .5rem;border-radius:4px;font-weight:600;}
+.badge-skema{background:#f3e8ff;color:#5b21b6;border:1px solid #d8b4fe;font-size:.72rem;padding:.12rem .5rem;border-radius:4px;font-weight:600;}
+.badge-skema.tesis{background:#e0f2fe;color:#075985;border-color:#7dd3fc;}
+.badge-sempro{background:#dcfce7;color:#15803d;border:1px solid #86efac;font-size:.72rem;padding:.12rem .5rem;border-radius:4px;font-weight:600;}
+
+.file-row{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border:1.5px solid;border-radius:8px;margin-bottom:.45rem;font-size:.83rem;}
+.file-row.ok{background:#f0fdf4;border-color:#86efac;}
+.file-row.no{background:#fef2f2;border-color:#fca5a5;}
+.file-row.skip{background:#f9fafb;border-color:#d1d5db;opacity:.65;}
+.file-row .fl-label{flex:1;font-weight:600;color:#374259;}
+.btn-preview{background:linear-gradient(135deg,var(--navy),#1a4a9e);color:#fff;border:none;padding:.3rem .75rem;border-radius:6px;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.badge-artikel{font-size:.63rem;background:#ede9fe;color:#5b21b6;padding:.08rem .4rem;border-radius:4px;font-weight:700;margin-left:.35rem;}
+
+.catatan-box{background:#fef2f2;border:1.5px solid #fca5a5;border-left:5px solid #dc2626;border-radius:10px;padding:1rem 1.15rem;color:#7f1d1d;font-size:.87rem;line-height:1.65;}
+.btn-revisi{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:9px;padding:.6rem 1.1rem;font-weight:700;width:100%;margin-top:.9rem;}
+
+.jadwal-item{display:flex;gap:.65rem;padding:.6rem 0;border-bottom:1px solid #f3f4f6;font-size:.86rem;}
+.jadwal-item:last-child{border:none;}
+.jadwal-item i{color:var(--navy);margin-top:2px;}
+.jdi-label{font-weight:700;color:#6b7280;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;}
+.jdi-value{color:#1a1a2e;font-weight:600;}
+
+.countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:.5rem;}
+.countdown-item{border-radius:7px;padding:.45rem .2rem;text-align:center;}
+.countdown-item .cd-num{font-size:1.05rem;font-weight:800;color:#fff;line-height:1;}
+.countdown-item .cd-unit{font-size:.58rem;margin-top:.22rem;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.85);}
+.cd-hari{background:linear-gradient(135deg,#0b2e6b,#1a4a9e);}
+.cd-jam{background:linear-gradient(135deg,#8a6a10,#c9a227);}
+.cd-menit{background:linear-gradient(135deg,#0f4d30,#1a7a4a);}
+.cd-detik{background:linear-gradient(135deg,#8b0000,#c62828);}
+
+.penguji-block{border-radius:9px;padding:.7rem .95rem;margin-bottom:.5rem;display:flex;gap:.6rem;font-size:.85rem;}
+.pk-ketua{background:#fff7ed;border:1.5px solid #fed7aa;}
+.pk-sekret{background:#f0fdf4;border:1.5px solid #86efac;}
+.pk-p1{background:#eef4ff;border:1.5px solid #c0d4f5;}
+.pk-p2{background:#f3f0ff;border:1.5px solid #d0bfff;}
+.pk-role{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;}
+.pk-name{font-weight:700;color:#1a1a2e;font-size:.84rem;line-height:1.4;}
+
+.progress-wrap{background:var(--gray);border-radius:9px;padding:.7rem .9rem;margin-bottom:.8rem;}
+
+/* ═══ TABEL DASHBOARD (gaya Portal Seminar Proposal) ═══ */
+.main-card{background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(11,46,107,.09);overflow:hidden;}
+.card-title-bar{background:var(--gray);border-bottom:1px solid var(--border);padding:1rem 1.4rem;}
+.ctb-left{font-weight:700;color:var(--navy);font-size:1rem;display:flex;align-items:center;gap:.5rem;}
+.ctb-left i{color:var(--gold);}
+.card-body-inner{padding:1.25rem 1.4rem;overflow-x:auto;}
+
+.btn-dosen,.btn-lihat{background:linear-gradient(135deg,var(--navy),#1a4a9e);color:#fff;border:none;padding:.42rem .9rem;border-radius:7px;font-weight:600;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;box-shadow:0 2px 8px rgba(11,46,107,.25);transition:all .25s;text-decoration:none;}
+.btn-dosen:hover,.btn-lihat:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(11,46,107,.35);color:#fff;}
+.btn-bap{display:inline-flex;align-items:center;gap:.35rem;background:linear-gradient(135deg,#1a7a4a,#28a069);color:#fff;border:none;padding:.42rem .9rem;border-radius:7px;font-size:.82rem;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(26,122,74,.3);cursor:pointer;}
+.btn-revisi-cta{display:inline-flex;align-items:center;gap:.35rem;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:.42rem .9rem;border-radius:20px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(220,38,38,.35);animation:pulseBtn 1.5s infinite;}
+@keyframes pulseBtn{0%,100%{box-shadow:0 2px 8px rgba(220,38,38,.35);}50%{box-shadow:0 4px 16px rgba(220,38,38,.6);transform:translateY(-1px);}}
+.btn-revisi-done{background:#94a3b8;color:#fff;border:none;padding:.42rem .9rem;border-radius:20px;font-size:.82rem;font-weight:700;cursor:not-allowed;}
+.jadwal-none{color:#aaa;font-style:italic;font-size:.82rem;}
+
+/* Modal generik */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:#fff;border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.28);width:580px;max-width:95vw;max-height:92vh;overflow:auto;animation:slideUpM .3s;}
+@keyframes slideUpM{from{transform:translateY(40px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-hdr{color:#fff;padding:1.1rem 1.4rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-hdr.navy{background:linear-gradient(135deg,var(--navy),#1a4a9e);}
+.modal-hdr-title{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem;margin:0;}
+.modal-close-btn{background:transparent;border:none;color:#fff;font-size:1.4rem;cursor:pointer;width:30px;height:30px;border-radius:4px;}
+.modal-close-btn:hover{background:rgba(255,255,255,.2);}
+.modal-bdy{padding:1.4rem;}
+.modal-ftr{padding:.9rem 1.4rem;border-top:1px solid #e9ecef;display:flex;justify-content:flex-end;gap:.5rem;}
+.btn-sm-navy{height:36px;padding:0 .9rem;background:var(--navy);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;}
+
+.dosen-block{border-radius:10px;padding:1rem 1.15rem;margin-bottom:.85rem;}
+.dosen-block.pb1{background:linear-gradient(135deg,#eef4ff,#dce9ff);border:1.5px solid #c0d4f5;}
+.dosen-block.pb2{background:linear-gradient(135deg,#f3f0ff,#e5dcff);border:1.5px solid #d0bfff;}
+.dosen-block .db-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;}
+.dosen-block.pb1 .db-label{color:#2451a8;} .dosen-block.pb2 .db-label{color:#5a2fa8;}
+.dosen-block .db-name{font-weight:700;font-size:.92rem;}
+.dosen-block.pb1 .db-name{color:var(--navy);} .dosen-block.pb2 .db-name{color:#3a1a80;}
+
+.jadwal-detail-card{border-radius:12px;overflow:hidden;}
+.jadwal-detail-card.online .jdc-header{background:linear-gradient(135deg,#ecfeff,#cffafe);border:1.5px solid #67e8f9;}
+.jadwal-detail-card.offline .jdc-header{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;}
+.jdc-header{padding:1rem 1.15rem;display:flex;align-items:center;gap:.75rem;}
+.jdc-icon{font-size:2.2rem;} .jdc-mode{font-weight:700;font-size:1rem;color:#374259;} .jdc-sub{font-size:.8rem;color:#7a8aaa;}
+
+.bk-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .85rem;border:1px solid var(--border);border-radius:8px;margin-bottom:.5rem;background:#fff;}
+.bk-item:last-child{margin-bottom:0;}
+.bk-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.bk-ic.ok{background:#d1e7dd;color:#0f5132;}
+.bk-ic.no{background:#f8d7da;color:#842029;}
+.bk-ic.skip{background:#f1f5f9;color:#94a3b8;}
+.bk-name{flex:1;min-width:0;font-size:.86rem;font-weight:600;color:#374259;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-card">
+    <div class="text-center mb-3">
+      <img src="https://hukum.upnvj.ac.id/wp-content/uploads/2025/10/WhatsApp-Image-2025-10-14-at-13.45.20-1.png">
+      <h5 class="mt-2 fw-bold" style="color:var(--navy);">Portal Status Ujian Tesis</h5>
+      <p class="small text-muted mb-0"><i>Masuk menggunakan akun yang sama seperti di<br><b>Dashboard Pengajuan Judul</b></i></p>
+    </div>
+    <div id="loginError" class="alert alert-danger py-2 small d-none"></div>
+    <form id="loginForm">
+      <label class="login-label">NIM</label>
+      <div class="login-input-group mb-3">
+        <i class="bi bi-person-vcard input-icon"></i>
+        <input type="text" id="loginNim" class="form-control login-input" placeholder="Masukkan NIM Anda" autocomplete="username" required>
+      </div>
+      <label class="login-label">Password</label>
+      <div class="login-input-group mb-3">
+        <i class="bi bi-lock input-icon"></i>
+        <input type="password" id="loginPassword" class="form-control login-input" placeholder="Masukkan password Anda" autocomplete="current-password" required>
+        <button type="button" class="password-toggle" onclick="togglePassword()"><i class="bi bi-eye" id="passwordIcon"></i></button>
+      </div>
+      <button type="submit" id="loginBtn" class="btn btn-navy"><i class="bi bi-box-arrow-in-right me-1"></i> Masuk</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app" hidden style="display:none;">
+  <div class="header">
+    <img src="https://hukum.upnvj.ac.id/wp-content/uploads/2025/10/WhatsApp-Image-2025-10-14-at-13.45.20-1.png">
+    <h5>Status Pendaftaran Ujian Tesis</h5>
+    <p>Program Studi Hukum Program Magister — FH UPNVJ</p>
+  </div>
+
+  <div class="container py-4" style="max-width:1300px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="small text-muted" id="welcomeText"></span>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary" onclick="loadRecord()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
+      </div>
+    </div>
+
+    <div id="loadingBox" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+
+    <div id="content" style="display:none;">
+  <div class="main-card">
+    <div class="card-title-bar">
+      <div class="ctb-left"><i class="bi bi-mortarboard-fill"></i> Data Ujian Tesis Anda</div>
+    </div>
+    <div class="card-body-inner">
+      <table class="table table-bordered" style="width:100%;">
+        <thead>
+          <tr style="background:var(--navy);color:#fff;">
+            <th style="padding:.9rem .75rem;">Mahasiswa</th>
+            <th style="padding:.9rem .75rem;">Judul</th>
+            <th style="padding:.9rem .75rem;text-align:center;">Dosen Pembimbing</th>
+            <th style="padding:.9rem .75rem;text-align:center;">Status Berkas</th>
+            <th style="padding:.9rem .75rem;">Jadwal Ujian</th>
+            <th style="padding:.9rem .75rem;text-align:center;">BAP</th>
+            <th style="padding:.9rem .75rem;text-align:center;">Berkas</th>
+            <th style="padding:.9rem .75rem;text-align:center;">Revisi</th>
+          </tr>
+        </thead>
+        <tbody><tr id="rowUjian"></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<!-- MODAL: DOSEN -->
+<div class="modal-overlay" id="modalDosenOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr navy"><p class="modal-hdr-title"><i class="bi bi-person-workspace"></i> Dosen Pembimbing</p><button class="modal-close-btn" onclick="closeModal('modalDosenOverlay')">×</button></div>
+    <div class="modal-bdy">
+      <div class="dosen-block pb1"><div class="db-label">Dosen Pembimbing 1</div><div class="db-name" id="mdPb1">—</div></div>
+      <div class="dosen-block pb2"><div class="db-label">Dosen Pembimbing 2</div><div class="db-name" id="mdPb2">—</div></div>
+    </div>
+    <div class="modal-ftr"><button class="btn-sm-navy" onclick="closeModal('modalDosenOverlay')">Tutup</button></div>
+  </div>
+</div>
+
+<!-- MODAL: JUDUL -->
+<div class="modal-overlay" id="modalJudulOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr navy"><p class="modal-hdr-title"><i class="bi bi-journal-text"></i> Detail Judul & Data</p><button class="modal-close-btn" onclick="closeModal('modalJudulOverlay')">×</button></div>
+    <div class="modal-bdy" id="judulMhsContent"></div>
+    <div class="modal-ftr"><button class="btn-sm-navy" onclick="closeModal('modalJudulOverlay')">Tutup</button></div>
+  </div>
+</div>
+
+<!-- MODAL: JADWAL -->
+<div class="modal-overlay" id="modalJadwalOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr navy" id="jadwalModalHdr"><p class="modal-hdr-title" id="jadwalModalTitle"><i class="bi bi-calendar2-event"></i> Detail Jadwal Ujian</p><button class="modal-close-btn" onclick="closeModal('modalJadwalOverlay')">×</button></div>
+    <div class="modal-bdy" id="jadwalDetailContent"></div>
+    <div class="modal-ftr"><button class="btn-sm-navy" onclick="closeModal('modalJadwalOverlay')">Tutup</button></div>
+  </div>
+</div>
+
+<!-- MODAL: BERKAS -->
+<div class="modal-overlay" id="modalBerkasOverlay">
+  <div class="modal-box">
+    <div class="modal-hdr navy"><p class="modal-hdr-title"><i class="bi bi-folder2-open"></i> Kelengkapan Berkas</p><button class="modal-close-btn" onclick="closeModal('modalBerkasOverlay')">×</button></div>
+    <div class="modal-bdy" id="berkasContent"></div>
+    <div class="modal-ftr"><button class="btn-sm-navy" onclick="closeModal('modalBerkasOverlay')">Tutup</button></div>
+  </div>
+</div>
+
+<!-- Modal Preview -->
+<div class="modal fade" id="modalPreview" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="border-radius:14px;">
+      <div class="modal-header" style="background:linear-gradient(135deg,var(--navy),#1a4a9e);color:#fff;border-radius:14px 14px 0 0;">
+        <h6 class="modal-title fw-bold" id="previewTitle">Preview Berkas</h6>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-2" style="height:76vh;">
+        <iframe id="previewIframe" src="" style="width:100%;height:100%;border:none;border-radius:8px;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Revisi -->
+<div class="modal fade" id="modalRevisi" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:14px;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:14px 14px 0 0;">
+        <h6 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> Revisi Berkas</h6>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+        <div id="rvCatatanBox" class="catatan-box mb-3" style="display:none;"></div>
+        <label class="fw-bold small mb-2" style="color:var(--navy);"><i class="bi bi-list-check me-1"></i> Pilih Berkas yang Akan Direvisi</label>
+        <div id="rvCheckList" style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:1rem;"></div>
+        <div id="rvSlots"></div>
+      </div>
+      <div class="modal-footer">
+        <span class="small text-muted me-auto" id="rvProgress"></span>
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-danger btn-sm" id="rvSubmitBtn" onclick="submitRevisi()" disabled><i class="bi bi-send"></i> Kirim Revisi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbXmZb0tdV8_aLkv3fexzFnOU8JwHGXlAvRbPR1ukRmfVnMgpHyZPPJyxybBIzQCsa/exec';
+const SURVEY_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdQ6C0sAQVYsOv0Mo7tMjj21jtI4mmOoipwoOUCZOktTBYxZQ/viewform?usp=sf_link';
+
+let CURRENT_NIM = null, record = null, rvFiles = {}, countdownTimer = null;
+
+const FILE_LABELS = [
+  { key:'ijazah',               label:'Ijazah Terakhir' },
+  { key:'ktp',                  label:'Scan KTP' },
+  { key:'biodata',              label:'Biodata Terbaru' },
+  { key:'spp',                  label:'Bukti Lunas SPP' },
+  { key:'khs',                  label:'Kartu Hasil Studi (KHS)' },
+  { key:'sertifikat_1',         label:'Sertifikat Kuliah Umum' },
+  { key:'sertifikat_2',         label:'Sertifikat Kunjungan Luar Negeri' },
+  { key:'persetujuan',          label:'Lembar Persetujuan Ujian Seminar Hasil' },
+  { key:'monitoring_bimbingan', label:'Kartu Monitoring Bimbingan Tesis' },
+  { key:'toefl',                label:'Sertifikat TOEFL' },
+  { key:'turnitin',             label:'Turnitin' },
+  { key:'persetujuan_revisi',   label:'Lembar Persetujuan Revisi & Matriks' },
+  { key:'naskah',               label:'Naskah Proposal Tesis' },
+  { key:'ppt',                  label:'PPT Presentasi' },
+  { key:'bukti_publish',        label:'Bukti Link Publish Jurnal', isLink:true },
+  { key:'sertifikat_sinta',     label:'Sertifikat/SK Akreditasi Sinta', artikelOnly:true },
+  { key:'naskah_jurnal',        label:'Naskah Jurnal' },
+  { key:'loa_jurnal',           label:'LoA Jurnal' },
+  { key:'review_artikel',       label:'Bukti Review Artikel Ilmiah', artikelOnly:true },
+  { key:'korespondensi',        label:'Bukti Korespondensi Penerbit', artikelOnly:true }
+];
+
+const FILE_LIST_REVISI = [
+  { key:'ijazah',               label:'Ijazah Terakhir',                ext:['pdf'], maxMB:5 },
+  { key:'ktp',                  label:'Scan KTP',                       ext:['pdf','jpg','jpeg','png'], maxMB:2 },
+  { key:'biodata',              label:'Biodata Terbaru',                ext:['pdf'], maxMB:2 },
+  { key:'spp',                  label:'Bukti Lunas SPP',                ext:['pdf'], maxMB:2 },
+  { key:'khs',                  label:'Kartu Hasil Studi (KHS)',        ext:['pdf'], maxMB:2 },
+  { key:'sertifikat_1',         label:'Sertifikat Kuliah Umum',         ext:['pdf'], maxMB:2 },
+  { key:'sertifikat_2',         label:'Sertifikat Kunjungan Luar Negeri', ext:['pdf'], maxMB:2 },
+  { key:'persetujuan',          label:'Lembar Persetujuan Ujian Seminar Hasil', ext:['pdf'], maxMB:2 },
+  { key:'monitoring_bimbingan', label:'Kartu Monitoring Bimbingan',     ext:['pdf'], maxMB:2 },
+  { key:'toefl',                label:'Sertifikat TOEFL',               ext:['pdf'], maxMB:2 },
+  { key:'turnitin',             label:'Turnitin',                       ext:['pdf'], maxMB:15 },
+  { key:'persetujuan_revisi',   label:'Lembar Persetujuan Revisi & Matriks', ext:['pdf'], maxMB:2 },
+  { key:'naskah',               label:'Naskah Proposal Tesis',          ext:['pdf','doc','docx'], maxMB:15 },
+  { key:'ppt',                  label:'PPT Presentasi',                 ext:['ppt','pptx'], maxMB:15 },
+  { key:'sertifikat_sinta',     label:'Sertifikat/SK Akreditasi Sinta', ext:['pdf'], maxMB:5 },
+  { key:'naskah_jurnal',        label:'Naskah Jurnal',                  ext:['pdf','doc','docx'], maxMB:15 },
+  { key:'loa_jurnal',           label:'LoA Jurnal',                     ext:['pdf'], maxMB:5 },
+  { key:'review_artikel',       label:'Bukti Review Artikel Ilmiah',    ext:['pdf'], maxMB:5 },
+  { key:'korespondensi',        label:'Bukti Korespondensi Penerbit',   ext:['pdf'], maxMB:5 }
+];
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+async function post(d){ const r = await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(d)}); return r.json(); }
+
+function togglePassword(){
+  const i=document.getElementById('loginPassword'), ic=document.getElementById('passwordIcon');
+  if(i.type==='password'){ i.type='text'; ic.className='bi bi-eye-slash'; }
+  else { i.type='password'; ic.className='bi bi-eye'; }
+}
+
+function toShareUrl(url) {
+  if (!url || url === '-') return url;
+
+  const patterns = [
+    /\/(?:file|document|presentation|spreadsheets)\/d\/([a-zA-Z0-9_-]+)/,
+    /[?&]id=([a-zA-Z0-9_-]+)/,
+    /\/open\?id=([a-zA-Z0-9_-]+)/
+  ];
+
+  let fileId = '';
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) { fileId = m[1]; break; }
+  }
+
+  if (!fileId) return url;
+
+  if (url.includes('/spreadsheets/'))
+    return `https://docs.google.com/spreadsheets/d/${fileId}/edit?usp=sharing`;
+  if (url.includes('/document/'))
+    return `https://docs.google.com/document/d/${fileId}/preview`;
+  if (url.includes('/presentation/'))
+    return `https://docs.google.com/presentation/d/${fileId}/preview`;
+  return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+document.getElementById('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('loginBtn'), err=document.getElementById('loginError');
+  err.classList.add('d-none');
+  btn.disabled=true; btn.innerHTML='<span class="spinner-border spinner-border-sm"></span> Memeriksa...';
+  try{
+    const j = await post({action:'studentLogin',nim:document.getElementById('loginNim').value.trim(),password:document.getElementById('loginPassword').value});
+    if(j.status==='success'){ sessionStorage.setItem('ujianNim',j.user.nim); sessionStorage.setItem('ujianNama',j.user.nama||''); showApp(j.user.nim,j.user.nama); }
+    else { err.textContent=j.message||'NIM atau password salah.'; err.classList.remove('d-none'); }
+  }catch(e2){ err.textContent='Gagal menghubungi server: '+e2.message; err.classList.remove('d-none'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="bi bi-box-arrow-in-right me-1"></i> Masuk'; }
+});
+
+function logout(){ sessionStorage.removeItem('ujianNim'); sessionStorage.removeItem('ujianNama'); location.reload(); }
+
+function showApp(nim,nama){
+  CURRENT_NIM=nim;
+  document.getElementById('login-screen').hidden=true;
+  document.getElementById('login-screen').style.display='none';
+  const app=document.getElementById('app'); app.hidden=false; app.style.display='block';
+  document.getElementById('welcomeText').textContent = nama ? 'Selamat datang, '+nama : '';
+  loadRecord();
+}
+
+async function loadRecord(){
+  document.getElementById('loadingBox').style.display='block';
+  document.getElementById('content').style.display='none';
+  try{
+    const j = await post({action:'getMyRecord',nim:CURRENT_NIM});
+    if(j.status!=='success' || !j.found){
+      await Swal.fire({icon:'info',title:'Belum Terdaftar',text:j.message||'Data pendaftaran ujian tesis belum ditemukan.',confirmButtonText:'Kembali ke Login'});
+      logout(); return;
+    }
+    record=j; render();
+    document.getElementById('content').style.display='block';
+  }catch(e){ Swal.fire({icon:'error',title:'Gagal Memuat',text:e.message}); }
+  finally{ document.getElementById('loadingBox').style.display='none'; }
+}
+
+function openModal(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+
+function render(){
+  const t=String(record.statusBerkas||'').trim();
+  let cls='sb-menunggu', label=t||'Menunggu Upload Berkas';
+  if(t.includes('Berkas Lengkap')) cls='sb-lengkap';
+  else if(t.includes('Sebagian')) cls='sb-sebagian';
+  else if(t.includes('Jadwal')||t.includes('Diverifikasi')) cls='sb-jadwal';
+  else if(t.includes('Ujian Selesai')) cls='sb-selesai';
+  else if(t.includes('Tidak Memenuhi')||t.includes('Tidak Valid')) cls='sb-kurang';
+
+  const statusCell = `<span class="status-badge ${cls}">${esc(label)}</span>`;
+
+  const jadwalCell = record.jadwal
+    ? `<button class="btn-lihat" onclick="showJadwalModal()"><i class="bi bi-calendar2-event"></i> Lihat Jadwal</button>`
+    : `<span class="jadwal-none">Belum dijadwalkan</span>`;
+
+  const bapCell = record.bap
+    ? `<button class="btn-bap" onclick="checkAndOpenBAP(this)"><i class="bi bi-file-earmark-text-fill"></i> Lihat BAP</button>`
+    : `<span class="jadwal-none">Belum tersedia</span>`;
+
+  const isArtikel = String(record.skema||'').trim()==='Artikel Ilmiah';
+  let total=0, uploaded=0;
+  FILE_LABELS.forEach(f=>{
+    const val=String(record.files[f.key]||'').trim();
+    const ok = val && val!=='-' && (val.startsWith('http')||f.isLink);
+    const required = !f.artikelOnly || isArtikel;
+    if(required){ total++; if(ok) uploaded++; }
+  });
+  const berkasCell = `<button class="btn-lihat" onclick="showBerkasModal()"><i class="bi bi-folder2-open"></i> ${uploaded}/${total}</button>`;
+
+  let revisiCell = `<span class="jadwal-none">—</span>`;
+  if(record.catatanKurang){
+    const sudah = String(record.statusRevisi||'').includes('Sudah Revisi');
+    revisiCell = sudah
+      ? `<span class="btn-revisi-done"><i class="bi bi-check-circle-fill"></i> Sudah Revisi</span>`
+      : `<button class="btn-revisi-cta" onclick="openRevisi()"><i class="bi bi-pencil-square"></i> Revisi</button>`;
+  }
+
+  document.getElementById('rowUjian').innerHTML = `
+    <td><div style="font-weight:700;color:var(--navy);">${esc(record.nim||'-')}</div><div style="font-size:.82rem;color:#556;">${esc(record.nama||'-')}</div></td>
+    <td><button class="btn-lihat" onclick="showJudulModal()"><i class="bi bi-journal-text"></i> Lihat Detail</button></td>
+    <td style="text-align:center;"><button class="btn-dosen" onclick="showDosenModal()"><i class="bi bi-person-lines-fill"></i> Lihat Dosen</button></td>
+    <td style="text-align:center;">${statusCell}</td>
+    <td>${jadwalCell}</td>
+    <td style="text-align:center;">${bapCell}</td>
+    <td style="text-align:center;">${berkasCell}</td>
+    <td style="text-align:center;">${revisiCell}</td>
+  `;
+}
+
+function showDosenModal(){
+  document.getElementById('mdPb1').textContent = record.pembimbing1 || '(Belum ditetapkan)';
+  document.getElementById('mdPb2').textContent = record.pembimbing2 || '(Belum ditetapkan)';
+  openModal('modalDosenOverlay');
+}
+
+function showJudulModal(){
+  const sem=String(record.semester||'').trim(), ta=String(record.tahunAkademik||'').trim();
+  const periode = (sem||ta) ? ('Sem '+(sem||'-')+' · TA '+(ta||'-')) : '';
+  let badges='';
+  if(periode) badges+=`<span class="badge-periode me-1"><i class="bi bi-calendar3 me-1"></i>${esc(periode)}</span>`;
+  const skema=String(record.skema||'').trim(), idx=String(record.indeksAkreditasi||'').trim();
+  if(skema) badges+=`<span class="badge-skema ${skema==='Tesis'?'tesis':''} me-1"><i class="bi bi-diagram-3 me-1"></i>${esc(skema)}${idx?' · '+esc(idx):''}</span>`;
+  if(record.tanggalSempro) badges+=`<span class="badge-sempro"><i class="bi bi-calendar-event me-1"></i>SEMPRO: ${esc(record.tanggalSempro)}</span>`;
+
+  document.getElementById('judulMhsContent').innerHTML = `
+    <div class="mb-3">${badges}</div>
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:1rem 1.2rem;margin-bottom:${record.judulEN?'.75rem':'0'};">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#166534;margin-bottom:.5rem;">Judul (ID)</div>
+      <div style="color:#1a2a4a;font-weight:600;line-height:1.65;font-size:.9rem;">${esc(record.judul||'Belum ada judul')}</div>
+    </div>
+    ${record.judulEN ? `<div style="background:#eef4ff;border:1.5px solid #c0d4f5;border-radius:10px;padding:1rem 1.2rem;">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#2451a8;margin-bottom:.5rem;">Judul (EN)</div>
+      <div style="color:#1a2a4a;font-style:italic;line-height:1.65;font-size:.9rem;">${esc(record.judulEN)}</div>
+    </div>` : ''}
+    <div style="margin-top:1rem;font-size:.82rem;color:#556;"><strong>Konsentrasi:</strong> ${esc(record.konsentrasi||'—')}</div>`;
+  openModal('modalJudulOverlay');
+}
+
+function showJadwalModal(){
+  if(!record.jadwal) return;
+  const j=record.jadwal, isOnline=j.mode==='Online';
+  document.getElementById('jadwalModalHdr').style.background = isOnline
+    ? 'linear-gradient(135deg,#0d9488,#047a6e)' : 'linear-gradient(135deg,#92400e,#b45309)';
+  document.getElementById('jadwalModalTitle').innerHTML = `<i class="bi bi-calendar2-event me-2"></i>Jadwal Ujian — ${esc(j.mode)}`;
+
+  const expired = isOnline && isExamExpired(j.tanggal);
+  const lokasiHtml = isOnline
+    ? (expired
+        ? `<div class="jadwal-item"><i class="bi bi-lock-fill"></i><div><div class="jdi-label">Link Meeting</div><div class="jdi-value" style="color:#64748b;font-style:italic;">Ujian sudah selesai — link dihilangkan</div></div></div>`
+        : `<div class="jadwal-item"><i class="bi bi-link-45deg"></i><div><div class="jdi-label">Link Meeting</div><div class="jdi-value"><a href="${esc(j.link||'')}" target="_blank">${esc(j.link||'(tidak ada link)')}</a></div></div></div>`)
+    : `<div class="jadwal-item"><i class="bi bi-geo-alt"></i><div><div class="jdi-label">Tempat</div><div class="jdi-value">${esc(j.tempat||'—')}</div></div></div>`;
+
+  document.getElementById('jadwalDetailContent').innerHTML = `
+    <div class="jadwal-detail-card ${j.mode.toLowerCase()}">
+      <div class="jdc-header"><div class="jdc-icon">${isOnline?'💻':'🏛️'}</div><div><div class="jdc-mode">Ujian ${esc(j.mode)}</div><div class="jdc-sub">Detail jadwal ujian tesis</div></div></div>
+      <div class="jadwal-item"><i class="bi bi-calendar3"></i><div><div class="jdi-label">Tanggal</div><div class="jdi-value">${esc(j.tanggal||'—')}</div></div></div>
+      <div class="jadwal-item"><i class="bi bi-clock"></i><div><div class="jdi-label">Waktu</div><div class="jdi-value">${esc(j.jam||'—')}${j.jamSelesai?' – '+esc(j.jamSelesai):''}</div></div></div>
+      ${lokasiHtml}
+      <div class="jadwal-item"><div style="width:100%;"><div class="jdi-label">Hitung Mundur</div><div id="countdownContainer"></div></div></div>
+    </div>
+    <div class="mt-3">
+      <div class="jdi-label mb-2"><i class="bi bi-people-fill me-1"></i>Susunan Penguji</div>
+      <div class="penguji-block pk-ketua"><div>👨‍⚖️</div><div><div class="pk-role">Ketua Penguji (Pembimbing 1)</div><div class="pk-name">${esc(record.pembimbing1||'—')}</div></div></div>
+      <div class="penguji-block pk-sekret"><div>📋</div><div><div class="pk-role">Sekretaris Penguji (Pembimbing 2)</div><div class="pk-name">${esc(record.pembimbing2||'—')}</div></div></div>
+      <div class="penguji-block pk-p1"><div>🎓</div><div><div class="pk-role">Penguji 1</div><div class="pk-name">${esc(j.penguji1||'(Belum ditetapkan)')}</div></div></div>
+      <div class="penguji-block pk-p2"><div>🎓</div><div><div class="pk-role">Penguji 2</div><div class="pk-name">${esc(j.penguji2||'(Belum ditetapkan)')}</div></div></div>
+    </div>`;
+  openModal('modalJadwalOverlay');
+  startCountdown(j.tanggal, j.jam);
+}
+
+function showBerkasModal(){
+  const isArtikel = String(record.skema||'').trim()==='Artikel Ilmiah';
+  let html = '';
+  FILE_LABELS.forEach(f=>{
+    const val=String(record.files[f.key]||'').trim();
+    const ok = val && val!=='-' && (val.startsWith('http')||f.isLink);
+    const required = !f.artikelOnly || isArtikel;
+    if(!required && !ok){
+      html += `<div class="bk-item"><div class="bk-ic skip"><i class="bi bi-dash-circle"></i></div><div class="bk-name">${esc(f.label)}</div><span style="font-size:.76rem;color:#94a3b8;font-style:italic;">Tidak diperlukan</span></div>`;
+    } else if(ok){
+      const action = f.isLink
+        ? `<a class="btn-sm-navy" href="${esc(val)}" target="_blank" style="text-decoration:none;"><i class="bi bi-box-arrow-up-right"></i> Buka</a>`
+        : `<button class="btn-sm-navy" onclick="openPreview('${esc(toPreviewUrl(val,f.key))}','${esc(f.label)}')"><i class="bi bi-eye"></i> Lihat</button>`;
+      html += `<div class="bk-item"><div class="bk-ic ok"><i class="bi bi-file-earmark-check-fill"></i></div><div class="bk-name">${esc(f.label)}</div>${action}</div>`;
+    } else {
+      html += `<div class="bk-item"><div class="bk-ic no"><i class="bi bi-exclamation-circle-fill"></i></div><div class="bk-name">${esc(f.label)}</div><span style="color:#dc2626;font-size:.78rem;font-weight:600;">Belum</span></div>`;
+    }
+  });
+  document.getElementById('berkasContent').innerHTML = html;
+  openModal('modalBerkasOverlay');
+}
+
+function toPreviewUrl(url,key){
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(!m) return url;
+  const fid=m[1];
+  if(key==='ppt') return 'https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent('https://drive.google.com/uc?export=download&id='+fid);
+  if(['naskah','naskah_jurnal'].includes(key)) return 'https://docs.google.com/viewer?url='+encodeURIComponent('https://drive.google.com/uc?export=download&id='+fid)+'&embedded=true';
+  return 'https://drive.google.com/file/d/'+fid+'/preview';
+}
+function openPreview(url,label){
+  document.getElementById('previewTitle').textContent=label;
+  document.getElementById('previewIframe').src=url;
+  new bootstrap.Modal(document.getElementById('modalPreview')).show();
+}
+document.getElementById('modalPreview').addEventListener('hidden.bs.modal',()=>{document.getElementById('previewIframe').src='';});
+
+function isExamExpired(tgl){
+  if(!tgl) return false;
+  try{ const d=new Date(tgl+'T00:00:00'); const a=new Date(d); a.setDate(a.getDate()+1);
+    const t=new Date(); t.setHours(0,0,0,0); return t>=a; }catch(e){ return false; }
+}
+function stopCountdown(){ if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; } }
+function startCountdown(tgl,jam){
+  stopCountdown();
+  const el=document.getElementById('countdownContainer'); if(!el||!tgl) return;
+  const jamStr=/^\d{1,2}:\d{2}/.test(jam||'')?jam:'00:00';
+  const target=new Date(tgl+'T'+jamStr+':00');
+  if(isNaN(target.getTime())){ el.innerHTML='<div class="jdi-value">—</div>'; return; }
+  function tick(){
+    const now=new Date(), diff=target-now;
+    if(diff<=0){
+      const ongoing=(now-target)<3*3600000;
+      el.innerHTML=`<div class="jdi-value" style="color:${ongoing?'#166534':'#64748b'};"><i class="bi bi-${ongoing?'broadcast':'check-circle-fill'} me-1"></i>${ongoing?'Ujian sedang berlangsung':'Waktu ujian telah berlalu'}</div>`;
+      if(!ongoing) stopCountdown();
+      return;
+    }
+    const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000),s=Math.floor(diff%60000/1000);
+    el.innerHTML=`<div class="countdown-grid">
+      <div class="countdown-item cd-hari"><div class="cd-num">${d}</div><div class="cd-unit">Hari</div></div>
+      <div class="countdown-item cd-jam"><div class="cd-num">${String(h).padStart(2,'0')}</div><div class="cd-unit">Jam</div></div>
+      <div class="countdown-item cd-menit"><div class="cd-num">${String(m).padStart(2,'0')}</div><div class="cd-unit">Menit</div></div>
+      <div class="countdown-item cd-detik"><div class="cd-num">${String(s).padStart(2,'0')}</div><div class="cd-unit">Detik</div></div>
+    </div>`;
+  }
+  tick(); countdownTimer=setInterval(tick,1000);
+}
+
+async function checkAndOpenBAP(btn){
+  const orig=btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<span class="spinner-border spinner-border-sm"></span> Memeriksa...';
+  try{
+    const r=await post({action:'checkSurveyByNIM',nim:CURRENT_NIM});
+    if(r.status!=='success') throw new Error(r.message||'Gagal memeriksa survey.');
+    if(r.found){ window.open(toBapUrl(record.bap),'_blank'); }
+    else{
+      const res=await Swal.fire({icon:'info',title:'Anda Belum Mengisi Survey',
+        html:'<p style="font-size:.88rem;">Untuk melihat BAP, Anda diwajibkan mengisi survey kepuasan layanan terlebih dahulu.</p>',
+        showCancelButton:true,confirmButtonText:'Isi Survey Sekarang',cancelButtonText:'Batal',confirmButtonColor:'#0b2e6b'});
+      if(res.isConfirmed) window.open(SURVEY_FORM_URL,'_blank');
+    }
+  }catch(e){ Swal.fire({icon:'error',title:'Gagal',text:e.message}); }
+  finally{ btn.disabled=false; btn.innerHTML=orig; }
+}
+function toBapUrl(url){
+  if(!url||url==='-') return url;
+  const pats=[/\/(?:file|document|presentation|spreadsheets)\/d\/([a-zA-Z0-9_-]+)/,/[?&]id=([a-zA-Z0-9_-]+)/];
+  let fid=''; for(const p of pats){ const m=url.match(p); if(m){ fid=m[1]; break; } }
+  if(!fid) return url;
+  if(url.includes('/spreadsheets/')) return `https://docs.google.com/spreadsheets/d/${fid}/edit?usp=sharing`;
+  if(url.includes('/document/'))     return `https://docs.google.com/document/d/${fid}/edit?usp=sharing`;
+  if(url.includes('/presentation/')) return `https://docs.google.com/presentation/d/${fid}/edit?usp=sharing`;
+  return `https://drive.google.com/file/d/${fid}/view?usp=sharing`;
+}
+
+// ── REVISI ──
+function openRevisi(){
+  rvFiles={};
+  const box=document.getElementById('rvCatatanBox');
+  if(record.catatanKurang){ box.style.display='block'; box.textContent=record.catatanKurang.catatan||'—'; }
+  else box.style.display='none';
+  document.getElementById('rvCheckList').innerHTML = FILE_LIST_REVISI.map(f=>`
+    <label style="display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-size:.8rem;cursor:pointer;">
+      <input type="checkbox" value="${f.key}" onchange="onRvCheck()" style="accent-color:var(--navy);"> ${esc(f.label)}
+    </label>`).join('');
+  document.getElementById('rvSlots').innerHTML='';
+  document.getElementById('rvSubmitBtn').disabled=true;
+  document.getElementById('rvProgress').textContent='';
+  new bootstrap.Modal(document.getElementById('modalRevisi')).show();
+}
+function onRvCheck(){
+  const checked=[...document.querySelectorAll('#rvCheckList input:checked')].map(i=>i.value);
+  const slots=document.getElementById('rvSlots');
+  [...slots.children].forEach(el=>{ if(!checked.includes(el.dataset.key)){ el.remove(); delete rvFiles[el.dataset.key]; } });
+  checked.forEach(key=>{
+    if(document.getElementById('slot-'+key)) return;
+    const f=FILE_LIST_REVISI.find(x=>x.key===key);
+    const div=document.createElement('div');
+    div.id='slot-'+key; div.dataset.key=key;
+    div.style.cssText='border:1.5px solid var(--border);border-radius:9px;padding:.75rem;margin-bottom:.5rem;background:#fafbff;';
+    div.innerHTML=`<div class="small fw-bold mb-1" style="color:var(--navy);">${esc(f.label)}
+      <span class="text-muted fw-normal">(${f.ext.join(', ').toUpperCase()} · maks ${f.maxMB}MB)</span></div>
+      <input type="file" accept="${f.ext.map(e=>'.'+e).join(',')}" onchange="onRvFile('${key}',${f.maxMB},this)" style="width:100%;font-size:.82rem;">`;
+    slots.appendChild(div);
+  });
+  updateRvBtn();
+}
+function onRvFile(key,maxMB,input){
+  const file=input.files[0], f=FILE_LIST_REVISI.find(x=>x.key===key);
+  if(!file){ delete rvFiles[key]; updateRvBtn(); return; }
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!f.ext.includes(ext)){ Swal.fire({icon:'warning',title:'Format Tidak Sesuai',html:`Diizinkan: <b>${f.ext.join(', ').toUpperCase()}</b>`}); input.value=''; delete rvFiles[key]; updateRvBtn(); return; }
+  if(file.size>maxMB*1024*1024){ Swal.fire({icon:'warning',title:'File Terlalu Besar',html:`Maksimal <b>${maxMB} MB</b>`}); input.value=''; delete rvFiles[key]; updateRvBtn(); return; }
+  rvFiles[key]=file; updateRvBtn();
+}
+function updateRvBtn(){
+  const checked=[...document.querySelectorAll('#rvCheckList input:checked')].map(i=>i.value);
+  const ok=checked.length>0 && checked.every(k=>rvFiles[k]);
+  document.getElementById('rvSubmitBtn').disabled=!ok;
+  document.getElementById('rvProgress').textContent = checked.length ? `${checked.filter(k=>rvFiles[k]).length}/${checked.length} file siap` : '';
+}
+function fileToBase64(file){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=()=>rej(new Error('Gagal baca file')); r.readAsDataURL(file); });
+}
+async function submitRevisi(){
+  const checked=[...document.querySelectorAll('#rvCheckList input:checked')].map(i=>i.value);
+  if(!checked.length) return;
+  const conf=await Swal.fire({title:'Kirim Revisi?',html:`<p>Anda akan mengupload <b>${checked.length} berkas</b> revisi.</p><p style="font-size:.82rem;color:#6c757d;">File lama akan tertimpa.</p>`,icon:'question',showCancelButton:true,confirmButtonText:'Ya, Kirim',cancelButtonText:'Periksa Ulang',confirmButtonColor:'#dc2626'});
+  if(!conf.isConfirmed) return;
+  const btn=document.getElementById('rvSubmitBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner-border spinner-border-sm"></span> Mengupload...';
+  let ok=0, errs=[];
+  for(const key of checked){
+    const f=FILE_LIST_REVISI.find(x=>x.key===key), file=rvFiles[key];
+    document.getElementById('rvProgress').textContent=`Mengupload ${f.label}… (${ok+1}/${checked.length})`;
+    try{
+      const b64=await fileToBase64(file);
+      const r=await post({action:'uploadFile',nim:CURRENT_NIM,fileType:key,fileName:file.name,fileData:b64,fileLabel:f.label,isRevisi:true});
+      if(r.status!=='success') throw new Error(r.message||'Gagal');
+      ok++;
+    }catch(e){ errs.push(f.label+': '+e.message); }
+  }
+  bootstrap.Modal.getInstance(document.getElementById('modalRevisi')).hide();
+  if(!errs.length) await Swal.fire({icon:'success',title:'Revisi Terkirim',html:`<p><b>${ok} berkas</b> berhasil diupload.</p><p style="font-size:.82rem;color:#6c757d;">Menunggu verifikasi admin.</p>`,confirmButtonColor:'#1a7a4a'});
+  else await Swal.fire({icon:'warning',title:'Sebagian Gagal',html:`<p>${ok} berhasil, ${errs.length} gagal:</p><ul style="text-align:left;color:#dc2626;font-size:.82rem;">${errs.map(e=>'<li>'+esc(e)+'</li>').join('')}</ul>`});
+  loadRecord();
+}
+
+// Restore sesi per-tab
+(function(){
+  const nim=sessionStorage.getItem('ujianNim');
+  if(nim) showApp(nim, sessionStorage.getItem('ujianNama')||'');
+})();
+</script>
+</body>
+</html>
